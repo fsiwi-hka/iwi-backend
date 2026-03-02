@@ -1,7 +1,9 @@
 __all__ = [
     "Base",
-    "User"
+    "UserEntity",
+    "ContentEntity"
 ]
 
-from src.models.user import User
+from src.models.user import UserEntity
+from src.models.content import ContentEntity
 from src.models.base import Base
