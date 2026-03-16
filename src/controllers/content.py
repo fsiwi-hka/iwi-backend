@@ -1,42 +1,35 @@
-from flask import Blueprint, request, jsonify
-from sqlalchemy import select
+import os
 
-from src.db import db
+from flask import Blueprint, request, jsonify
+from werkzeug.utils import secure_filename, send_from_directory
+
 from src.middleware.auth import require_api_key
-from src.models.content import ContentEntity
+
+MARKDOWN_DIR = os.environ.get("MARKDOWN_DIR", "./data/uploads")
+os.makedirs(MARKDOWN_DIR, exist_ok=True)
 
 content_bp = Blueprint('api/content', __name__)
 
-@content_bp.get('/')
-def index():
-    """Listet alle Content-IDs und Dateinamen auf."""
-    entries = db.session.execute(select(ContentEntity)).scalars().all()
 
-    return jsonify([
-        {"id": str(entry.id), "filename": entry.filename}
-        for entry in entries
-    ]), 200
+@content_bp.get('/content/<string:filename>')
+def content(filename):
+    """Gibt eine Markdown-Datei zurück."""
 
-@content_bp.get('/content/<int:id>')
-def content(id):
-    """Gibt den Content einer bestimmten Datei zurück."""
-    entry = db.session.execute(
-        select(ContentEntity).where(ContentEntity.id == id)
-    ).scalars().first()
+    filename = secure_filename(filename)
 
-    return jsonify(
-        {
-            "id": str(entry.id),
-            "filename": entry.filename,
-            "content": entry.markdown_content
-        }
-    ), 200
+    path = os.path.join(MARKDOWN_DIR, filename)
+
+    if not os.path.exists(path):
+        return jsonify({"error": "Datei nicht gefunden"}), 404
+
+    return send_from_directory(MARKDOWN_DIR, filename, mimetype="text/markdown")
 
 
 @content_bp.post('/upload')
 @require_api_key
 def upload():
-    """Speichert den Inhalt einer Markdown-Datei in der Spalte 'markdown_content'."""
+    """Speichert eine Markdown-Datei im Storage-Verzeichnis."""
+
     if 'file' not in request.files:
         return jsonify({"error": "Feld 'file' fehlt."}), 400
 
@@ -49,23 +42,15 @@ def upload():
         return jsonify({"error": "Nur .md Dateien erlaubt."}), 400
 
     try:
-        # Inhalt auslesen
-        content_str = file.read().decode('utf-8')
+        filename = secure_filename(file.filename)
+        path = os.path.join(MARKDOWN_DIR, filename)
 
-        new_content = ContentEntity(
-            filename=file.filename,
-            markdown_content=content_str
-        )
-
-        db.session.add(new_content)
-        db.session.commit()
+        file.save(path)
 
         return jsonify({
             "status": "success",
-            "id": str(new_content.id),
-            "filename": new_content.filename
+            "filename": filename
         }), 201
 
     except Exception as e:
-        db.session.rollback()
         return jsonify({"error": str(e)}), 500

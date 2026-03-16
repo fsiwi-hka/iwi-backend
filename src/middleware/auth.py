@@ -1,12 +1,11 @@
+import os
 from functools import wraps
-from flask import request, jsonify, g
-from sqlalchemy import select
+from flask import request, jsonify
 
-from src.db import db
-from src.models.user import UserEntity
+API_KEY = os.environ.get("API_KEY")
 
 def require_api_key(f):
-    """Prüft, ob der X-API-Key in der User-Tabelle existiert."""
+    """Prüft, ob der X-API-Key dem in der .env entspricht."""
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -15,14 +14,9 @@ def require_api_key(f):
         if not api_key:
             return jsonify({"error": "API Key fehlt (X-API-Key Header)."}), 401
 
-        user = db.session.execute(
-            select(UserEntity).where(UserEntity.api_key == api_key)
-        ).scalar_one_or_none()
-
-        if user is None:
+        if api_key != API_KEY:
             return jsonify({"error": "Ungültiger API Key."}), 403
 
-        g.user = user
         return f(*args, **kwargs)
 
     return decorated_function
