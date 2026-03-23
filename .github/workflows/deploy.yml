@@ -20,7 +20,7 @@ jobs:
           source: "./"
           target: ${{ secrets.DEPLOY_PATH }}
           strip_components: 1
-          rm: true
+          rm: false
           debug: true
 
       - name: Deploy via SSH
