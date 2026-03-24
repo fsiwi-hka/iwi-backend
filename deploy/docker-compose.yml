@@ -9,7 +9,7 @@ services:
     container_name: flask-backend
     restart: always
     volumes:
-      - ./uploads:/data/uploads
+      - /opt/public:/data/uploads
     environment:
       - FLASK_ENV=production
       - MARKDOWN_DIR=/data/uploads
