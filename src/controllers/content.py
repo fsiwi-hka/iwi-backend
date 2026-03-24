@@ -10,6 +10,20 @@ os.makedirs(MARKDOWN_DIR, exist_ok=True)
 
 content_bp = Blueprint('api/content', __name__)
 
+@content_bp.get()
+def list_content():
+    """Listet alle Markdown-Dateien im Storage-Verzeichnis auf."""
+
+    try:
+        files = [
+            f for f in os.listdir(MARKDOWN_DIR)
+            if os.path.isfile(os.path.join(MARKDOWN_DIR, f)) and f.lower().endswith('.md')
+        ]
+
+        return jsonify({"files": files}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @content_bp.get('/content/<string:filename>')
 def content(filename):
