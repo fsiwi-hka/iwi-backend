@@ -5,6 +5,7 @@ services:
     build:
       context: ./../
       dockerfile: ./src/Dockerfile
+    image: iwi-backend:latest
     container_name: flask-backend
     restart: always
     volumes:
@@ -12,9 +13,6 @@ services:
     environment:
       - FLASK_ENV=production
       - MARKDOWN_DIR=/data/uploads
-      - API_KEY=
+      - API_KEY=${API_KEY}
     ports:
       - "5001:5001"
-
-volumes:
-  postgres_data:
