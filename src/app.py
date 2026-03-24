@@ -2,9 +2,9 @@ import os
 import sys
 from flask_cors import CORS
 from flask import Flask
-from src.config import Config
 from loguru import logger
-from src.controllers.content import content_bp
+from config import Config
+from controllers.content import content_bp
 
 logger.add(sys.stderr)
 

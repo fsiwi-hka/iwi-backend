@@ -3,7 +3,7 @@ import os
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename, send_from_directory
 
-from src.middleware.auth import require_api_key
+from middleware.auth import require_api_key
 
 MARKDOWN_DIR = os.environ.get("MARKDOWN_DIR", "./data/uploads")
 os.makedirs(MARKDOWN_DIR, exist_ok=True)
