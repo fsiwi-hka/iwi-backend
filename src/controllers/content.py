@@ -10,7 +10,7 @@ os.makedirs(MARKDOWN_DIR, exist_ok=True)
 
 content_bp = Blueprint('api/content', __name__)
 
-@content_bp.get()
+@content_bp.get('/')
 def list_content():
     """Listet alle Markdown-Dateien im Storage-Verzeichnis auf."""
 
