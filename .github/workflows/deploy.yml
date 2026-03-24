@@ -35,3 +35,6 @@ jobs:
             cd ${{ secrets.DEPLOY_PATH }}/deploy
             echo "API_KEY=${{ secrets.API_KEY }}" > .env
             chmod 600 .env
+
+            docker compose down
+            docker compose up -d --build
