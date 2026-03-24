@@ -6,7 +6,7 @@ services:
       context: ./../
       dockerfile: ./src/Dockerfile
     image: iwi-backend:latest
-    container_name: flask-backend
+    container_name: backend
     restart: always
     volumes:
       - /opt/public:/data/uploads
