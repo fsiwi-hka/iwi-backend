@@ -33,7 +33,8 @@ jobs:
             set -e
 
             cd ${{ secrets.DEPLOY_PATH }}/deploy
-            echo "API_KEY=${{ secrets.API_KEY }}" > .env
+            echo "COMPOSE_PROJECT_NAME=iwi-backend" > .env
+            echo "API_KEY=${{ secrets.API_KEY }}" >> .env
             chmod 600 .env
 
             docker compose down
