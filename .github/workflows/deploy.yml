@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy project to server via SCP
+      - name: Copy project to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -23,7 +23,7 @@ jobs:
           rm: false
           debug: true
 
-      - name: Deploy via SSH
+      - name: Build and start container
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -33,6 +33,5 @@ jobs:
             set -e
 
             cd ${{ secrets.DEPLOY_PATH }}/deploy
-
-            chmod +x restart.sh
-            ./restart.sh
+            echo "API_KEY=${{ secrets.API_KEY }}" > .env
+            chmod 600 .env
