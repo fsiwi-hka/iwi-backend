@@ -1,7 +1,7 @@
 import os
 
-from flask import Blueprint, request, jsonify
-from werkzeug.utils import secure_filename, send_from_directory
+from flask import Blueprint, request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
 
 from middleware.auth import require_api_key
 
@@ -36,7 +36,7 @@ def content(filename):
     if not os.path.exists(path):
         return jsonify({"error": "Datei nicht gefunden"}), 404
 
-    return send_from_directory(MARKDOWN_DIR, filename, mimetype="text/markdown")
+    return send_from_directory(MARKDOWN_DIR, filename, mimetype="text/markdown", as_attachment=True)
 
 
 @content_bp.post('/upload')
