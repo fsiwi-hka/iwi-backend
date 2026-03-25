@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 
 from middleware.auth import require_api_key
+from config import Config
 
 MARKDOWN_DIR = os.environ.get("MARKDOWN_DIR", "./data/uploads")
 os.makedirs(MARKDOWN_DIR, exist_ok=True)
@@ -17,7 +18,7 @@ def list_content():
     try:
         files = [
             f for f in os.listdir(MARKDOWN_DIR)
-            if os.path.isfile(os.path.join(MARKDOWN_DIR, f)) and f.lower().endswith('.md')
+            if os.path.isfile(os.path.join(MARKDOWN_DIR, f)) and f.lower().endswith(tuple(Config.ALLOWED_EXTENSIONS_UPLOAD))
         ]
 
         return jsonify({"files": files}), 200
@@ -25,18 +26,17 @@ def list_content():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@content_bp.get('/content/<string:filename>')
-def content(filename):
+@content_bp.get('/file')
+def content():
     """Gibt eine Markdown-Datei zurück."""
-
-    filename = secure_filename(filename)
+    filename = secure_filename(request.args.get('filename', ''))
 
     path = os.path.join(MARKDOWN_DIR, filename)
 
     if not os.path.exists(path):
         return jsonify({"error": "Datei nicht gefunden"}), 404
 
-    return send_from_directory(MARKDOWN_DIR, filename, mimetype="text/markdown", as_attachment=True)
+    return send_from_directory(MARKDOWN_DIR, filename, as_attachment=False)
 
 
 @content_bp.post('/upload')
@@ -52,8 +52,8 @@ def upload():
     if file.filename == '':
         return jsonify({"error": "Keine Datei ausgewählt."}), 400
 
-    if not file.filename.lower().endswith('.md'):
-        return jsonify({"error": "Nur .md Dateien erlaubt."}), 400
+    if not file.filename.lower().endswith(tuple(Config.ALLOWED_EXTENSIONS_UPLOAD)):
+        return jsonify({"error": "Nur" + Config.ALLOWED_EXTENSIONS_UPLOAD + " Dateien erlaubt."}), 400
 
     try:
         filename = secure_filename(file.filename)
